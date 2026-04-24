@@ -95,26 +95,23 @@ class Tokenizer:
         return final_result
     
     def encode(self, text: str) -> list[int]:
-        # Maybe first iterate over text and get all the special tokens in place?
         special_matches = []
         if len(self.special_tokens) == 0:
             special_chunks = [text]
         else:
-            special_pattern = "|".join(re.escape(tok) for tok in sorted(self.special_tokens, key=len, reverse=True))
+            special_pattern = "|".join(
+                re.escape(tok) for tok in sorted(self.special_tokens, key=len, reverse=True)
+            )
             special_matches = re.findall(special_pattern, text)
             special_chunks = re.split(special_pattern, text)
-        
+
         encoded_chunks: list[list[int]] = []
         for chunk in special_chunks:
-        # Let's split:
             encoded_chunk: list[int] = []
-            for pretoken in re.finditer(PAT, chunk):
-                pretoken = pretoken[0]
-                pretoken = [bytes([b]) for b in pretoken.encode('UTF-8')]
-                
-                pretoken = self._apply_merge(pretoken)
-                pretoken = self._pretoken_to_integer(pretoken)
-                encoded_chunk += pretoken
+            for pretoken_match in re.finditer(PAT, chunk):
+                encoded_chunk.extend(
+                    self._encode_pretoken(pretoken_match[0].encode("utf-8"))
+                )
             encoded_chunks.append(encoded_chunk)
 
         return self._merge_with_special_tokens(encoded_chunks, special_matches)
