@@ -18,6 +18,8 @@ class Tokenizer:
                 self.vocab[ix] = token
                 ix += 1
         self.vtoi = {s:i for (i,s) in self.vocab.items()}
+        
+        self.merge_rank = {pair: i for i, pair in enumerate(merges)}
 
     
     @classmethod
@@ -47,20 +49,23 @@ class Tokenizer:
         return cls(vocab, merges, special_tokens)
     
     def _apply_merge(self, pretoken: list[bytes]) -> list[bytes]:
-        ix = 0
-        while ix < len(self.merges):
-            jx = 0
-            new_pretoken = []
-            while jx < len(pretoken):
-                if jx < len(pretoken) - 1 and (pretoken[jx], pretoken[jx+1]) == self.merges[ix]:
-                    new_pretoken.append(pretoken[jx] + pretoken[jx+1])
-                    jx += 2
-                else:
-                    new_pretoken.append(pretoken[jx])
-                    jx += 1
-            pretoken = new_pretoken
-            ix += 1
-
+        if len(pretoken) < 2:
+            return pretoken
+        while True:
+            best_rank = len(self.merges)
+            best_idx = -1
+            for i in range(len(pretoken) - 1):
+                rank = self.merge_rank.get((pretoken[i], pretoken[i + 1]))
+                if rank is not None and rank < best_rank:
+                    best_rank = rank
+                    best_idx = i
+            if best_idx == -1:
+                break
+            pretoken = (
+                pretoken[:best_idx]
+                + [pretoken[best_idx] + pretoken[best_idx + 1]]
+                + pretoken[best_idx + 2:]
+            )
         return pretoken
     
     def _pretoken_to_integer(self, pretoken: list[bytes]) -> list[int]:

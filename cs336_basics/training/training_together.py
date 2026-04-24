@@ -18,7 +18,7 @@ from cs336_basics.training.checkpointing import save_checkpoint
 
 
 def train():
-    
+    print("train()")
     # TODO: make these args command-line inputs.
     
     d_model = 512
@@ -55,10 +55,14 @@ def train():
     # save_bpe(vocab, merges, vocab_path, merges_path)
     # print("done saving vocab and merges")
     
+    print("creating the tokenizer...")
+    
     tokenizer = Tokenizer.from_files(vocab_path, merges_path, special_tokens)
 
     with open(text_filepath, "r", encoding="utf-8") as f:
         token_ids = list(tokenizer.encode_iterable(f))   # or iterate lazily
+        
+    
     
     language_model = TransformerLanguageModel(vocab_size=vocab_size, context_length=context_length, num_layers=num_layers, d_model=d_model, d_ff=d_ff, num_heads=num_heads, rope_theta=rope_theta, device=device)
     
