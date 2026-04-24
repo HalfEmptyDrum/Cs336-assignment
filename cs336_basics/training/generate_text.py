@@ -56,7 +56,7 @@ def generate():
     
     x = torch.tensor([start_tokens], dtype=torch.long, device=device) # shape (1,1)
     
-    max_tokens_generated = 250
+    max_tokens_generated = 1000
     
     
     for _ in range(max_tokens_generated):
