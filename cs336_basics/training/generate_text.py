@@ -46,7 +46,7 @@ def generate():
         num_heads=num_heads, rope_theta=rope_theta, device=device,
     )
     
-    load_checkpoint("checkpoints/latest.pt", model=language_model, optimizer=)
+    load_checkpoint("checkpoints/latest.pt", model=language_model, optimizer=None)
     
     language_model = torch.compile(language_model, backend="aot_eager")
     
