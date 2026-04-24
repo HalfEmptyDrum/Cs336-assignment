@@ -75,7 +75,8 @@ def generate():
         
         
         
-    print(tokenizer.decode(x))
+    generated_ids = x[0].tolist()   # (1, T) tensor -> list of T ints
+    print(tokenizer.decode(generated_ids))
 
     
     
