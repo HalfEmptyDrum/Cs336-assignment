@@ -70,8 +70,8 @@ def generate():
         next_token = next_token.view(1, 1)                    # shape (1, 1)
         x = torch.cat([x, next_token], dim=1)                 # (1, T) + (1, 1) -> (1, T+1)
         
-        if x.shape[1] > language_model.context_length:
-            x = x[:, -language_model.context_length:]
+        if x.shape[1] > context_length:
+            x = x[:, -context_length:]
         
         
         

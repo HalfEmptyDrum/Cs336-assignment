@@ -42,6 +42,7 @@ class TransformerLanguageModel(nn.Module):
         
         x = self.lm_head(x)
 
+        
         # probs = self.softmax(x, dim=-1)
         
         return x
