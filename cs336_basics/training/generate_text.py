@@ -52,7 +52,6 @@ def generate():
     max_tokens_generated = 250
     
     
-    
     for _ in range(max_tokens_generated):
         logits = language_model(x) # (1, T, V)
         
