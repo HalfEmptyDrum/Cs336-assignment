@@ -12,15 +12,15 @@ from cs336_basics.training.checkpointing import load_checkpoint
 
 
 def generate():
-    d_model = 512
-    d_ff = 1344
+    d_model = 768
+    d_ff = 2048
     rope_theta = 10000
     context_length = 256
     vocab_size = 10000
 
     device = 'cuda'
     num_heads = 16
-    num_layers = 4
+    num_layers = 6
     
     special_tokens = ['<|endoftext|>']
 
