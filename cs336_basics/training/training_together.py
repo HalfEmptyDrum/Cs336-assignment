@@ -15,68 +15,69 @@ from cs336_basics.training.learning_rate_schedule import lr_cosine_schedule
 
 from cs336_basics.training.checkpointing import save_checkpoint
 
+import numpy as np
+from pathlib import Path
 
 
 def train():
     print("train()")
-    # TODO: make these args command-line inputs.
-    
+
     d_model = 512
     d_ff = 1344
     rope_theta = 10000
     context_length = 256
     vocab_size = 10000
-    
+
     device = 'cuda'
-    
     num_heads = 16
-    
     num_layers = 4
-    
     batch_size = 32
-    
     training_steps = 1000
-    
     special_tokens = ['<|endoftext|>']
-    
+
     ckpt_path = "checkpoints/"
-    
     vocab_path = "vocab/vocab_full.json"
     merges_path = "merges/merges_full.json"
-    
     text_filepath = "TinyStoriesV2-GPT4-train.txt"
-    
-    
-    # print("training the tokenizer...")
-    # vocab, merges = train_bpe(text_filepath, vocab_size, special_tokens)
-    
-    # print("done training the tokenizer!")
-    # print("saving vocab and merges...")
-    # save_bpe(vocab, merges, vocab_path, merges_path)
-    # print("done saving vocab and merges")
-    
+    token_bin_path = Path("tokens/train.bin")   # <-- new
+
     print("creating the tokenizer...")
-    
     tokenizer = Tokenizer.from_files(vocab_path, merges_path, special_tokens)
 
-    with open(text_filepath, "r", encoding="utf-8") as f:
-        token_ids = list(tokenizer.encode_iterable(f))   # or iterate lazily
-        
-    
-    
-    language_model = TransformerLanguageModel(vocab_size=vocab_size, context_length=context_length, num_layers=num_layers, d_model=d_model, d_ff=d_ff, num_heads=num_heads, rope_theta=rope_theta, device=device)
-    
+    # --- replaces the old `with open(...) / token_ids = list(...)` block ---
+    if not token_bin_path.exists():
+        print("tokenizing corpus to disk (one-time)...")
+        token_bin_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(text_filepath, "r", encoding="utf-8") as f, \
+             open(token_bin_path, "wb") as out:
+            buf = []
+            for tid in tokenizer.encode_iterable(f):
+                buf.append(tid)
+                if len(buf) >= 1_000_000:
+                    np.asarray(buf, dtype=np.uint16).tofile(out)
+                    buf.clear()
+            if buf:
+                np.asarray(buf, dtype=np.uint16).tofile(out)
+        print("done tokenizing.")
+
+    token_ids = np.memmap(token_bin_path, dtype=np.uint16, mode="r")
+    print(f"loaded {len(token_ids):,} tokens via memmap")
+    # -----------------------------------------------------------------------
+
+    language_model = TransformerLanguageModel(
+        vocab_size=vocab_size, context_length=context_length,
+        num_layers=num_layers, d_model=d_model, d_ff=d_ff,
+        num_heads=num_heads, rope_theta=rope_theta, device=device,
+    )
     language_model = torch.compile(language_model, backend="aot_eager")
-    
-    optimizer = AdamW(language_model.parameters(), lr=0.01, weight_decay=0.9, betas=(0.99, 0.999))
-    
-    
+
+    optimizer = AdamW(language_model.parameters(), lr=0.01,
+                      weight_decay=0.9, betas=(0.99, 0.999))
+
     print("starting training...")
-    # Let's train
-    
     for it in range(training_steps):
-        # generate batch:
         x, y = data_loading(token_ids, batch_size, context_length, device)
+        # ... rest unchanged
         
         # zero out gradients from the previous step.
         optimizer.zero_grad()
