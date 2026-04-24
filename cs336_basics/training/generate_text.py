@@ -29,7 +29,7 @@ def generate():
 
     device = 'cuda'
     num_heads = 16
-    num_layers = 6
+    num_layers = 4
     
     special_tokens = ['<|endoftext|>']
 
