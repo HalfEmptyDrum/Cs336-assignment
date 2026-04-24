@@ -37,8 +37,10 @@ def train():
     training_steps = 1000
     special_tokens = ['<|endoftext|>']
 
+    os.makedirs("checkpoints", exist_ok=True)
     ckpt_path = "checkpoints"
-    os.makedirs(ckpt_path, exist_ok=True)
+    ckpt_path = os.path.join(ckpt_path, "latest.pt")
+
     vocab_path = "vocab/vocab_full.json"
     merges_path = "merges/merges_full.json"
     text_filepath = "TinyStoriesV2-GPT4-train.txt"
