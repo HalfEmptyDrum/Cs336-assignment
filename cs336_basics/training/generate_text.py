@@ -2,86 +2,61 @@ import torch
 
 from cs336_basics.model.transformer_lm import TransformerLanguageModel
 from cs336_basics.tokenizer.encoder import Tokenizer
-
-import os
-
-from einops import rearrange
-
-
 from cs336_basics.training.checkpointing import load_checkpoint
 
-
-from cs336_basics.model.softmax import Softmax
+import os
 
 
 @torch.no_grad()
 def generate():
+    # model / config
     d_model = 512
     d_ff = 1344
     rope_theta = 10000
     context_length = 256
     vocab_size = 10000
 
-   
-    batch_size = 64
-    training_steps = 5000
-    val_interval = 500        # how often to run a quick validation pass
-    val_batches = 50          # how many batches to average over
-
     device = 'cuda'
     num_heads = 16
     num_layers = 4
-    
+
     special_tokens = ['<|endoftext|>']
 
-    os.makedirs("checkpoints", exist_ok=True)
     ckpt_path = os.path.join("checkpoints", "latest.pt")
-
     vocab_path = "vocab/vocab_full.json"
     merges_path = "merges/merges_full.json"
-    
+
+    # build model and load weights
     language_model = TransformerLanguageModel(
         vocab_size=vocab_size, context_length=context_length,
         num_layers=num_layers, d_model=d_model, d_ff=d_ff,
         num_heads=num_heads, rope_theta=rope_theta, device=device,
     )
-    
-    load_checkpoint("checkpoints/latest.pt", model=language_model, optimizer=None)
-    
-    language_model = torch.compile(language_model, backend="aot_eager")
-    
+    load_checkpoint(ckpt_path, model=language_model, optimizer=None)
+    language_model.eval()
+
+    # tokenizer
     tokenizer = Tokenizer.from_files(vocab_path, merges_path, special_tokens)
-    
+
+    # prime with <|endoftext|> so the model starts a fresh story
     start_tokens = tokenizer.encode("<|endoftext|>")
-    
-    x = torch.tensor([start_tokens], dtype=torch.long, device=device) # shape (1,1)
-    
-    max_tokens_generated = 1000
-    
-    
+    x = torch.tensor([start_tokens], dtype=torch.long, device=device)  # (1, T)
+
+    max_tokens_generated = 250
+
     for _ in range(max_tokens_generated):
-        logits = language_model(x) # (1, T, V)
-        
-        next_logits = logits[0, -1, :] # only the last position matters.
-        
+        # truncate to context window before the forward pass
+        x_cond = x if x.shape[1] <= context_length else x[:, -context_length:]
+
+        logits = language_model(x_cond)                    # (1, T, V)
+        next_logits = logits[0, -1, :]                     # (V,)
         probs = torch.softmax(next_logits, dim=-1)
-        
-        next_token = torch.multinomial(probs, num_samples=1)  # shape (1,)
-        next_token = next_token.view(1, 1)                    # shape (1, 1)
-        x = torch.cat([x, next_token], dim=1)                 # (1, T) + (1, 1) -> (1, T+1)
-        
-        if x.shape[1] > context_length:
-            x = x[:, -context_length:]
-        
-        
-        
-    generated_ids = x[0].tolist()   # (1, T) tensor -> list of T ints
+        next_token = torch.multinomial(probs, num_samples=1).view(1, 1)
+        x = torch.cat([x, next_token], dim=1)
+
+    generated_ids = x[0].tolist()
     print(tokenizer.decode(generated_ids))
 
-    
-    
-    
-    
-    
-if __name__== "__main__":
+
+if __name__ == "__main__":
     generate()
