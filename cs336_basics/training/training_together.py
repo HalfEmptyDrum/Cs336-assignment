@@ -73,7 +73,7 @@ def train():
     vocab_path = "vocab/vocab_full.json"
     merges_path = "merges/merges_full.json"
     train_text_path = "TinyStoriesV2-GPT4-train.txt"
-    val_text_path = "TinyStoriesV2-GPT4-test.txt"
+    val_text_path = "TinyStoriesV2-GPT4-valid.txt"
     train_bin_path = Path("tokens/train.bin")
     val_bin_path = Path("tokens/val.bin")
 
