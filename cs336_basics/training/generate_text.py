@@ -15,11 +15,17 @@ from cs336_basics.model.softmax import Softmax
 
 @torch.no_grad()
 def generate():
-    d_model = 768
-    d_ff = 2048
+    d_model = 512
+    d_ff = 1344
     rope_theta = 10000
     context_length = 256
     vocab_size = 10000
+
+   
+    batch_size = 64
+    training_steps = 5000
+    val_interval = 500        # how often to run a quick validation pass
+    val_batches = 50          # how many batches to average over
 
     device = 'cuda'
     num_heads = 16
