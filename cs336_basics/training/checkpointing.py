@@ -2,12 +2,13 @@ import torch
 import os
 import typing
 
-def save_checkpoint(model: torch.nn.Module, optimizer: torch.optim.Optimizer, iteration: int, out: str | os.PathLike | typing.BinaryIO | typing.IO[bytes]):
+def save_checkpoint(model, optimizer, iteration, path):
+    raw_model = model._orig_mod if hasattr(model, '_orig_mod') else model
     torch.save({
-        'model' : model.state_dict(),
-        'optimizer' : optimizer.state_dict(),
-        'iteration' : iteration
-    }, out)
+        'model': raw_model.state_dict(),
+        'optimizer': optimizer.state_dict(),
+        'iteration': iteration,
+    }, path)
     
 def load_checkpoint(src: str | os.PathLike | typing.BinaryIO | typing.IO[bytes], model: torch.nn.Module, optimizer: torch.optim.Optimizer):
     ckpt = torch.load(src)

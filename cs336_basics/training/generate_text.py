@@ -5,12 +5,15 @@ from cs336_basics.tokenizer.encoder import Tokenizer
 
 import os
 
+from einops import rearrange
 
 
 from cs336_basics.training.checkpointing import load_checkpoint
 
+from cs336_basics.model.softmax import Softmax
 
 
+@torch.no_grad()
 def generate():
     d_model = 768
     d_ff = 2048
@@ -46,6 +49,27 @@ def generate():
     
     x = torch.tensor([start_tokens], dtype=torch.long, device=device) # shape (1,1)
     
+    max_tokens_generated = 250
+    
+    
+    
+    for _ in range(max_tokens_generated):
+        logits = language_model(x) # (1, T, V)
+        
+        next_logits = logits[0, -1, :] # only the last position matters.
+        
+        probs = torch.softmax(next_logits, dim=-1)
+        
+        next_token = torch.multinomial(probs, num_samples=1).item()
+        
+        x = torch.cat([x, next_token], dim=1)
+        
+        if x.shape[1] > language_model.context_length:
+            x = x[:, -language_model.context_length:]
+        
+        
+        
+    print(tokenizer.decode(x))
 
     
     
