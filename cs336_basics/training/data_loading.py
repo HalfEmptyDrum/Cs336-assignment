@@ -2,15 +2,18 @@
 import torch
 from einops import rearrange
 
-def data_loading(x: torch.Tensor, batch_size: int, context_length: int, device = None):
-    
-    x = torch.tensor(x, device=device)
-    
-    starting_indices = torch.randint(low=0, high=x.shape[0]-context_length, size=(batch_size,), device=device)
-    
-    idx_train = rearrange(starting_indices, "n -> n 1") + torch.arange(context_length, device=device)
+import numpy as np
 
-    return x[idx_train], x[idx_train + 1]
+def data_loading(x, batch_size: int, context_length: int, device=None):
+    # x is a numpy memmap (uint16). Don't move it to GPU.
+    n = len(x)
+    starts = np.random.randint(0, n - context_length, size=batch_size)
+    idx = starts[:, None] + np.arange(context_length)[None, :]   # (B, T)
+
+    # Index in numpy, cast to int64 (torch long), then send to GPU.
+    x_batch = torch.from_numpy(x[idx].astype(np.int64)).to(device)
+    y_batch = torch.from_numpy(x[idx + 1].astype(np.int64)).to(device)
+    return x_batch, y_batch
 
     
     
