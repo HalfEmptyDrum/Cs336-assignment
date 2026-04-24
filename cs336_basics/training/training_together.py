@@ -18,6 +18,8 @@ from cs336_basics.training.checkpointing import save_checkpoint
 import numpy as np
 from pathlib import Path
 
+import os
+
 
 def train():
     print("train()")
@@ -35,7 +37,8 @@ def train():
     training_steps = 1000
     special_tokens = ['<|endoftext|>']
 
-    ckpt_path = "checkpoints/"
+    ckpt_path = "checkpoints"
+    os.makedirs(ckpt_path, exist_ok=True)
     vocab_path = "vocab/vocab_full.json"
     merges_path = "merges/merges_full.json"
     text_filepath = "TinyStoriesV2-GPT4-train.txt"
