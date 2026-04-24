@@ -66,9 +66,9 @@ def generate():
         
         probs = torch.softmax(next_logits, dim=-1)
         
-        next_token = torch.multinomial(probs, num_samples=1).item()
-        
-        x = torch.cat([x, next_token], dim=1)
+        next_token = torch.multinomial(probs, num_samples=1)  # shape (1,)
+        next_token = next_token.view(1, 1)                    # shape (1, 1)
+        x = torch.cat([x, next_token], dim=1)                 # (1, T) + (1, 1) -> (1, T+1)
         
         if x.shape[1] > language_model.context_length:
             x = x[:, -language_model.context_length:]
