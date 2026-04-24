@@ -34,7 +34,7 @@ def train():
     num_heads = 16
     num_layers = 4
     batch_size = 32
-    training_steps = 1000
+    training_steps = 5000
     special_tokens = ['<|endoftext|>']
 
     os.makedirs("checkpoints", exist_ok=True)
@@ -102,14 +102,15 @@ def train():
         if it % 50 == 0:
             print(f"iteration {it}, loss = {loss.item()}")
             
-        if it % 100 == 0:
+        if it % 1000 == 0:
             save_checkpoint(language_model, optimizer, it, ckpt_path)
         
   
     print(f"final loss = {loss.item()}")
+    
+    
         
-        
-        
+    
         
         
     
