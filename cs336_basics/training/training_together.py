@@ -60,7 +60,7 @@ def train():
 
     device = 'cuda'
     num_heads = 16
-    num_layers = 4
+    num_layers = 8
     batch_size = 256
     training_steps = 5000
     val_interval = 500        # how often to run a quick validation pass
