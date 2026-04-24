@@ -1,6 +1,8 @@
 from typing import Iterable, Iterator
 import regex as re
 
+from functools import lru_cache
+
 from tests.common import gpt2_bytes_to_unicode
 
 PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
@@ -20,7 +22,13 @@ class Tokenizer:
         self.vtoi = {s:i for (i,s) in self.vocab.items()}
         
         self.merge_rank = {pair: i for i, pair in enumerate(merges)}
+        
+        self._encode_pretoken = lru_cache(maxsize=None)(self._encode_pretoken_impl)
 
+    def _encode_pretoken_impl(self, pretoken_bytes: bytes) -> tuple[int, ...]:
+        pretoken = [bytes([b]) for b in pretoken_bytes]
+        pretoken = self._apply_merge(pretoken)
+        return tuple(self.vtoi[b] for b in pretoken)
     
     @classmethod
     def from_files(cls, vocab_filepath: str, merges_filepath: str, special_tokens: list[str] | None = None):

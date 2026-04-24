@@ -77,7 +77,6 @@ def train():
     print("starting training...")
     for it in range(training_steps):
         x, y = data_loading(token_ids, batch_size, context_length, device)
-        # ... rest unchanged
         
         # zero out gradients from the previous step.
         optimizer.zero_grad()
