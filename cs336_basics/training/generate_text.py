@@ -60,13 +60,13 @@ def generate(cfg: dict):
 
         logits = language_model(x_cond)                # (1, T, V)
         next_logits = logits[0, -1, :]                 # (V,)
-        # temperature scaling
+
         if temperature == 0:
-            next_logits = torch.argmax(next_logits, dim=-1)
+            next_token = torch.argmax(next_logits, dim=-1)
         else:
-            next_logits = next_logits / temperature
-        probs = torch.softmax(next_logits, dim=-1)
-        next_token = torch.multinomial(probs, num_samples=1).view(1, 1)
+            probs = torch.softmax(next_logits / temperature, dim=-1)
+            next_token = torch.multinomial(probs, num_samples=1).view(1, 1)
+        
         x = torch.cat([x, next_token], dim=1)
         
         if next_token == end_token:
