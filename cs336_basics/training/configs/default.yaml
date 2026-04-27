@@ -22,14 +22,14 @@ model:
   rope_theta: 10000
 
 optimizer:
-  lr: 0.01
+  lr: 0.03
   weight_decay: 0.9
   betas: [0.99, 0.999]
 
 training:
   device: cuda
-  batch_size: 256
-  training_steps: 1000
+  batch_size: 64
+  training_steps: 4000
   val_interval: 100
   val_batches: 256
   ckpt_interval: 1000

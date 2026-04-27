@@ -470,5 +470,6 @@ if __name__ == "__main__":
         plot_sweep(runs, sweep_dir / "sweep_train.png", split="train")
         plot_lr_vs_loss(runs, sweep_dir / "lr_vs_loss.png", split="val")
     else:
+        print("here")
         log_path = train(cfg, experiment=args.name)
         plot_run(log_path)
