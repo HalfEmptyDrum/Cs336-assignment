@@ -27,16 +27,16 @@ optimizer:
   betas: [0.99, 0.999]
 
 training:
-  device: mps
-  batch_size: 32
-  training_steps: 500
-  val_interval: 500
-  val_batches: 50
+  device: cuda
+  batch_size: 256
+  training_steps: 1000
+  val_interval: 100
+  val_batches: 256
   ckpt_interval: 1000
-  final_val_batches: 200
+  final_val_batches: 256
 
 generation:
-  device: mps
+  device: cuda
   max_new_tokens: 2000
   prompt: "<|endoftext|>"
   temperature: 0.5

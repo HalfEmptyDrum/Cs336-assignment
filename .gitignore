@@ -177,3 +177,6 @@ checkpoints/*
 tokens/*
 
 vocab/*
+
+# Logs
+logs/*
