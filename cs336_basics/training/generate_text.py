@@ -52,15 +52,22 @@ def generate(cfg: dict):
     x = torch.tensor([start_tokens], dtype=torch.long, device=device)  # (1, T)
 
     max_new_tokens = gen_cfg["max_new_tokens"]
+    
+    end_token = tokenizer.encode(gen_cfg['end_token'])
 
     for _ in range(max_new_tokens):
         x_cond = x if x.shape[1] <= context_length else x[:, -context_length:]
 
         logits = language_model(x_cond)                # (1, T, V)
         next_logits = logits[0, -1, :]                 # (V,)
+        # temperature scaling
+        next_logits = next_logits / temperature
         probs = torch.softmax(next_logits, dim=-1)
         next_token = torch.multinomial(probs, num_samples=1).view(1, 1)
         x = torch.cat([x, next_token], dim=1)
+        
+        if next_token == end_token:
+            break
 
     generated_ids = x[0].tolist()
     print(tokenizer.decode(generated_ids))

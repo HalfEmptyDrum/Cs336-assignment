@@ -104,7 +104,9 @@ def train(cfg: dict):
         loss.backward()
         optimizer.step()
 
-        print(f"iteration {it}, train loss = {loss.item():.4f}")
+
+        if it % 100 == 0:
+            print(f"iteration {it}, train loss = {loss.item():.4f}")
 
         if it % val_interval == 0 and it > 0:
             val_loss = evaluate(

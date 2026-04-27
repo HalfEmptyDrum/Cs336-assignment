@@ -15,9 +15,9 @@ tokenizer:
 
 model:
   d_model: 256
-  d_ff: 768
+  d_ff: 1024
   num_layers: 6
-  num_heads: 16
+  num_heads: 8
   context_length: 128
   rope_theta: 10000
 
@@ -29,7 +29,7 @@ optimizer:
 training:
   device: mps
   batch_size: 32
-  training_steps: 200
+  training_steps: 500
   val_interval: 500
   val_batches: 50
   ckpt_interval: 1000
@@ -40,3 +40,4 @@ generation:
   max_new_tokens: 250
   prompt: "<|endoftext|>"
   temperature: 0.5
+  end_token: "<|endoftext|>"
