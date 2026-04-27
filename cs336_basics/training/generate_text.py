@@ -14,6 +14,27 @@ def load_config(path: str) -> dict:
         return yaml.safe_load(f)
 
 
+
+def nucleus(q, p):
+    
+    # q: (V, ) probability distribution
+    sorted_probs, sorted_indices = torch.sort(q, descending=True)
+    sorted_probs.cumsum_(dim=-1)
+    
+    sorted_mask = sorted_probs > p
+    # shift by one so that the boundary token is kept.
+    sorted_mask[1:] = sorted_mask[:-1].clone()
+    sorted_mask[0] = False
+    
+    mask = torch.zeros_like(q, dtype=torch.bool)
+    mask.scatter_(-1, sorted_indices, sorted_mask)
+    q.masked_fill(mask, 0.0)
+    
+    q.div_(q.sum())
+    
+    return q
+
+
 @torch.no_grad()
 def generate(cfg: dict):
     paths = cfg["paths"]
@@ -65,12 +86,15 @@ def generate(cfg: dict):
             next_token = torch.argmax(next_logits, dim=-1)
         else:
             probs = torch.softmax(next_logits / temperature, dim=-1)
+            probs = nucleus(probs, gen_cfg['top_p'])
             next_token = torch.multinomial(probs, num_samples=1).view(1, 1)
         
         x = torch.cat([x, next_token], dim=1)
-        
-        if next_token == end_token:
+
+        if next_token[0].tolist()[0] == end_token[0]:
             break
+
+            
 
     generated_ids = x[0].tolist()
     print(tokenizer.decode(generated_ids))

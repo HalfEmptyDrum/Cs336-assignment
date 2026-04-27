@@ -37,7 +37,8 @@ training:
 
 generation:
   device: mps
-  max_new_tokens: 250
+  max_new_tokens: 2000
   prompt: "<|endoftext|>"
   temperature: 0.5
   end_token: "<|endoftext|>"
+  top_p : 0.5
