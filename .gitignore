@@ -170,4 +170,6 @@ TinyStoriesV2-GPT4-valid.txt
 input.txt
 input2.txt
 
-/Users/kaifollmann/Projekte/assignment1-basics/tests/fixtures/*
+tests/fixtures/*
+
+checkpoints/*

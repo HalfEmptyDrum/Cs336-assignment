@@ -1,0 +1,42 @@
+paths:
+  vocab: vocab/vocab_full.json
+  merges: merges/merges_full.json
+  train_text: tests/fixtures/tinystories_sample_5M.txt
+  val_text: tests/fixtures/tinystories_sample_5M.txt
+  train_bin: tokens/train.bin
+  val_bin: tokens/val.bin
+  checkpoint_dir: checkpoints
+  checkpoint_name: latest.pt
+
+tokenizer:
+  vocab_size: 10000
+  special_tokens:
+    - "<|endoftext|>"
+
+model:
+  d_model: 256
+  d_ff: 768
+  num_layers: 6
+  num_heads: 16
+  context_length: 128
+  rope_theta: 10000
+
+optimizer:
+  lr: 0.01
+  weight_decay: 0.9
+  betas: [0.99, 0.999]
+
+training:
+  device: mps
+  batch_size: 32
+  training_steps: 200
+  val_interval: 500
+  val_batches: 50
+  ckpt_interval: 1000
+  final_val_batches: 200
+
+generation:
+  device: mps
+  max_new_tokens: 250
+  prompt: "<|endoftext|>"
+  temperature: 0.5
