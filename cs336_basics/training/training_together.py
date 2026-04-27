@@ -16,6 +16,9 @@ from cs336_basics.training.checkpointing import save_checkpoint
 
 from cs336_basics.training.preprocessing import tokenize_to_bin
 
+from cs336_basics.tokenizer.tokenizer import train_bpe
+from cs336_basics.tokenizer.save_bpe import save_bpe
+
 
 def load_config(path: str) -> dict:
     with open(path, "r") as f:
@@ -55,6 +58,28 @@ def train(cfg: dict):
     ckpt_path = os.path.join(paths["checkpoint_dir"], paths["checkpoint_name"])
 
     print("creating the tokenizer...")
+    
+    vocab_path = Path(paths["vocab"])
+    merges_path = Path(paths["merges"]) 
+    
+    if not vocab_path.exists() or not merges_path.exists():
+        print("vocab/merges not found, training tokenizer from scratch...")
+        vocab, merges = train_bpe(
+        input_path=paths["train_text"],
+        vocab_size=tok_cfg["vocab_size"],
+        special_tokens=tok_cfg["special_tokens"],
+    )
+
+        vocab_path.parent.mkdir(parents=True, exist_ok=True)
+        merges_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        save_bpe(vocab, merges, vocab_path, merges_path)
+        
+        print("done training tokenizer!")
+        
+
+        
+    
     tokenizer = Tokenizer.from_files(
         paths["vocab"], paths["merges"], tok_cfg["special_tokens"]
     )
@@ -100,12 +125,13 @@ def train(cfg: dict):
         y_pred = language_model(x)
         y_pred = rearrange(y_pred, "B T V -> (B T) V")
         y = rearrange(y, "B T -> (B T)")
+
         loss = cross_entropy(y_pred, y)
         loss.backward()
         optimizer.step()
 
 
-        if it % 100 == 0:
+        if it % 10 == 0:
             print(f"iteration {it}, train loss = {loss.item():.4f}")
 
         if it % val_interval == 0 and it > 0:

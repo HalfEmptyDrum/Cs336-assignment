@@ -1,8 +1,8 @@
 paths:
   vocab: vocab/vocab_full.json
   merges: merges/merges_full.json
-  train_text: tests/fixtures/tinystories_sample_5M.txt
-  val_text: tests/fixtures/tinystories_sample_5M.txt
+  train_text: TinyStoriesV2-GPT4-train.txt
+  val_text: TinyStoriesV2-GPT4-valid.txt
   train_bin: tokens/train.bin
   val_bin: tokens/val.bin
   checkpoint_dir: checkpoints
@@ -14,11 +14,11 @@ tokenizer:
     - "<|endoftext|>"
 
 model:
-  d_model: 256
-  d_ff: 1024
-  num_layers: 6
-  num_heads: 8
-  context_length: 128
+  d_model: 512
+  d_ff: 1344
+  num_layers: 4
+  num_heads: 16
+  context_length: 256
   rope_theta: 10000
 
 optimizer:

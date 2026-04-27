@@ -173,3 +173,7 @@ input2.txt
 tests/fixtures/*
 
 checkpoints/*
+
+tokens/*
+
+vocab/*
