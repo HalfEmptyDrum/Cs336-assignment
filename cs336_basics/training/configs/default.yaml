@@ -28,7 +28,7 @@ optimizer:
 
 training:
   device: cuda
-  batch_size: 64
+  batch_size: 32
   training_steps: 4000
   val_interval: 100
   val_batches: 256

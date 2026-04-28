@@ -1,0 +1,9 @@
+einops
+einx
+numpy
+pytest
+pytest-timeout
+regex
+torch
+tqdm
+matplotlib
