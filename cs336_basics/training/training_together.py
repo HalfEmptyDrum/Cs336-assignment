@@ -15,6 +15,9 @@ from cs336_basics.training.data_loading import data_loading
 from cs336_basics.training.cross_entropy import cross_entropy
 from cs336_basics.training.checkpointing import save_checkpoint
 
+
+from cs336_basics.training.learning_rate_schedule import lr_cosine_schedule
+
 from cs336_basics.training.preprocessing import tokenize_to_bin
 
 from cs336_basics.tokenizer.tokenizer import train_bpe
@@ -72,6 +75,8 @@ def train(cfg: dict,
     model_cfg = cfg["model"]
     opt_cfg = cfg["optimizer"]
     tr_cfg = cfg["training"]
+    
+    schedule_cfg = cfg["scheduler"]
 
     device = tr_cfg["device"]
     batch_size = tr_cfg["batch_size"]
@@ -151,6 +156,10 @@ def train(cfg: dict,
     val_interval = tr_cfg["val_interval"]
     val_batches = tr_cfg["val_batches"]
     ckpt_interval = tr_cfg["ckpt_interval"]
+    
+    a_max = schedule_cfg["a_max"]
+    a_min = schedule_cfg["a_min"]
+    warmup_steps = schedule_cfg["warmup_steps"]
 
     print(f"starting training (lr={lr:.2e}, steps={training_steps})...")
     diverged = False
@@ -159,6 +168,11 @@ def train(cfg: dict,
         for it in range(training_steps):
             x, y = data_loading(train_ids, batch_size, context_length, device)
 
+            lr = lr_cosine_schedule(it, a_max=a_max, a_min=a_min, T_w=warmup_steps, T_c=training_steps)
+            
+            for param_group in optimizer.param_groups:
+                param_group["lr"] = lr
+            
             optimizer.zero_grad()
             y_pred = language_model(x)
             y_pred = rearrange(y_pred, "B T V -> (B T) V")
