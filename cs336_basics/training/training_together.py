@@ -68,7 +68,6 @@ def train(cfg: dict,
             (created if needed). Filenames already include lr+timestamp so
             multiple runs/sweeps under the same name won't collide.
     """
-    print("train()")
 
     paths = cfg["paths"]
     tok_cfg = cfg["tokenizer"]
@@ -160,6 +159,7 @@ def train(cfg: dict,
     a_max = schedule_cfg["a_max"]
     a_min = schedule_cfg["a_min"]
     warmup_steps = schedule_cfg["warmup_steps"]
+    steps_until_max = schedule_cfg["steps_until_max"]
 
     print(f"starting training (lr={lr:.2e}, steps={training_steps})...")
     diverged = False
@@ -168,7 +168,7 @@ def train(cfg: dict,
         for it in range(training_steps):
             x, y = data_loading(train_ids, batch_size, context_length, device)
 
-            lr = lr_cosine_schedule(it, a_max=a_max, a_min=a_min, T_w=warmup_steps, T_c=training_steps)
+            lr = lr_cosine_schedule(it, a_max=a_max, a_min=a_min, T_w=warmup_steps, T_c=steps_until_max)
             
             for param_group in optimizer.param_groups:
                 param_group["lr"] = lr
@@ -484,6 +484,5 @@ if __name__ == "__main__":
         plot_sweep(runs, sweep_dir / "sweep_train.png", split="train")
         plot_lr_vs_loss(runs, sweep_dir / "lr_vs_loss.png", split="val")
     else:
-        print("here")
         log_path = train(cfg, experiment=args.name)
         plot_run(log_path)

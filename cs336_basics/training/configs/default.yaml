@@ -14,9 +14,9 @@ tokenizer:
     - "<|endoftext|>"
 
 model:
-  d_model: 512
-  d_ff: 1344
-  num_layers: 4
+  d_model: 1024
+  d_ff: 4096
+  num_layers: 24
   num_heads: 16
   context_length: 256
   rope_theta: 10000
@@ -28,9 +28,9 @@ optimizer:
 
 training:
   device: cuda
-  batch_size: 32
-  training_steps: 2000
-  val_interval: 100
+  batch_size: 64
+  training_steps: 5000
+  val_interval: 200
   val_batches: 256
   ckpt_interval: 1000
   final_val_batches: 256
@@ -46,5 +46,6 @@ generation:
 
 scheduler:
   a_max: 0.003
-  a_min: 0.0003
+  a_min: 0.0001
   warmup_steps: 200
+  steps_until_max: 1800
